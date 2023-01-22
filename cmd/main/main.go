@@ -15,24 +15,6 @@ import (
 	"github.com/m1kx/go-vtr-backend/pkg/utils/structs"
 )
 
-func assemble_message(data [][]string, d int) (msg_part string) {
-	info_type := data[d][5]
-	info_room := ""
-	if strings.Contains(info_type, "Raum") {
-		info_room = fmt.Sprintf(" in Raum %s", data[d][4])
-	}
-	info_time := data[d][1]
-	info_time_seperated := strings.Split(info_time, " - ")
-	if len(info_time_seperated) > 1 {
-		info_time = fmt.Sprintf(" von Stunde %s bis %s ", info_time_seperated[0], info_time_seperated[1])
-	} else {
-		info_time = fmt.Sprintf(" in Stunde %s ", info_time)
-	}
-	info_subject := strings.Split(data[d][2], " ")[0]
-	msg_part = fmt.Sprintf("🤖 %s in %s%s%s", info_type, info_subject, info_room, info_time)
-	return
-}
-
 func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, err error) {
 	scrape_start := time.Now()
 	days := []string{"heute", "morgen"}
@@ -93,7 +75,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 			for x := 0; x < len(subjects); x++ {
 				for d := 0; d < len(data); d++ {
 					if data[d][0] == class && data[d][2] == subjects[x] {
-						msg = fmt.Sprintf("%s\n%s", msg, assemble_message(data, d))
+						msg = fmt.Sprintf("%s\n%s", msg, notify.AssembleMessage(data, d))
 						all = append(all, data[d])
 					}
 				}
