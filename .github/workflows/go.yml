@@ -17,7 +17,7 @@ jobs:
 
     - name: Build Go bot
       run: |
-        go build cmd/main/main.go -o ${{ secrets.APP_PATH }}/bot
+        go build -o ${{ secrets.APP_PATH }}/bot cmd/main/main.go
 
     - name: Create systemd service
       run: |
