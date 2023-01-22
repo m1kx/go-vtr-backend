@@ -1,0 +1,5 @@
+.env
+pb/
+bot_*
+build.sh
+.vscode

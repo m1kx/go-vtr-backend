@@ -1,0 +1,41 @@
+name: Go
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.x
+
+    - name: Build Go bot
+      run: |
+        go build -o ${{ secrets.APP_PATH }}/bot
+
+    - name: Create systemd service
+      run: |
+        echo "[Unit]
+        Description=Vertretung Info Bot
+        
+        [Service]
+        WorkingDirectory=${{ secrets.APP_PATH }}
+        ExecStart=${{ secrets.APP_PATH }}/bot
+        Restart=always
+        
+        [Install]
+        WantedBy=multi-user.target" > bot-${{ github.sha }}-go.service
+        sudo systemctl reset-failed
+        sudo systemctl list-units --type=service --all | grep bot-.*-go | awk '{print $1}' | xargs -L1 sudo systemctl stop
+        sudo systemctl list-units --type=service --all | grep bot-.*-go | awk '{print $1}' | xargs -L1 sudo systemctl disable
+        sudo rm -f /etc/systemd/system/bot-*-go.service || true
+        sudo mv bot-*-go.service /etc/systemd/system/
+        sudo systemctl daemon-reload
+        sudo systemctl start bot-${{ github.sha }}-go
+        sudo systemctl enable bot-${{ github.sha }}-go
