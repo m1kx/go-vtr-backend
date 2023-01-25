@@ -37,6 +37,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 			err = pocketbase.EditField("update", obj.ID, false)
 		}
 	}
+	num_users = verified_count
 
 	for t := 0; t < len(days); t++ {
 		scrape_site_start := time.Now()
