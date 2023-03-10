@@ -10,6 +10,8 @@ func AssembleMessage(data [][]string, d int) (msg_part string) {
 	info_room := ""
 	if strings.Contains(info_type, "Raum") {
 		info_room = fmt.Sprintf(" in Raum %s", data[d][4])
+	} else if strings.Contains(info_type, "Klausur") {
+		info_room = fmt.Sprintf(" in Raum %s", data[d][4])
 	}
 	info_time := data[d][1]
 	info_time_seperated := strings.Split(info_time, " - ")
@@ -22,4 +24,3 @@ func AssembleMessage(data [][]string, d int) (msg_part string) {
 	msg_part = fmt.Sprintf("🤖 %s in %s%s%s", info_type, info_subject, info_room, info_time)
 	return
 }
-
