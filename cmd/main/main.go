@@ -83,8 +83,16 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 				}
 			}
 
-			// generate the hash from matches
+			day := ""
+			if t == 0 {
+				day = "h"
+			} else {
+				day = "m"
+			}
+
 			if len(all) == 0 {
+				// clear hash
+				err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "")
 				continue
 			}
 			all_string := ""
@@ -98,13 +106,6 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 				}
 			}
 			all_string = all_string[:len(all_string)-3]
-
-			day := ""
-			if t == 0 {
-				day = "h"
-			} else {
-				day = "m"
-			}
 
 			all_base := utils.EncodeBase64(all_string)
 			if (day == "h" && all_base == users[i].H_HASH) || (day == "m" && all_base == users[i].M_HASH) {
