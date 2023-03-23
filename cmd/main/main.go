@@ -119,9 +119,11 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 				continue
 			}
 
-			notify.SendMail(msg, users[i].EMAIL)
+			if users[i].NEW_VERSION {
+				notify.SendMail(msg, users[i].EMAIL)
+			}
 
-			if users[i].REQINFO.URL != "" {
+			if users[i].REQINFO.URL != "" && users[i].NEW_VERSION {
 				props := ""
 				url := users[i].REQINFO.URL
 				if users[i].REQINFO.METHOD == "POST" {
