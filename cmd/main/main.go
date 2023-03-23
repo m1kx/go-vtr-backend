@@ -87,9 +87,22 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 				continue
 			}
 			all_string := ""
-			for i := 0; i < len(all); i++ {
-				for x := 0; x < len(all[i]); x++ {
-					all_string = fmt.Sprintf("%s%s", all_string, all[i][x])
+			if users[i].USERNAME == "knixknax" {
+				for i := 0; i < len(all); i++ {
+					for x := 0; x < len(all[i]); x++ {
+						if x == len(all[i])-1 {
+							all_string = fmt.Sprintf("%s%s!!!", all_string, all[i][x])
+							continue
+						}
+						all_string = fmt.Sprintf("%s%s|", all_string, all[i][x])
+					}
+				}
+				all_string = all_string[:len(all_string)-3]
+			} else {
+				for i := 0; i < len(all); i++ {
+					for x := 0; x < len(all[i]); x++ {
+						all_string = fmt.Sprintf("%s%s", all_string, all[i][x])
+					}
 				}
 			}
 
