@@ -17,6 +17,8 @@ func health(w http.ResponseWriter, r *http.Request) {
 	} else {
 		status = "dead"
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	fmt.Fprint(w, fmt.Sprintf("{\"status\": \"%s\", \"last_words\": \"%s\"}", status, strings.ReplaceAll(last_words, "\"", "\\\"")))
 }
 
