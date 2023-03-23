@@ -17,18 +17,18 @@ func format_row(row []string) {
 	}
 }
 
-func Scrape(day string) (data [][]string, base string, wd string, err error) {
+func Scrape(day string) (data [][]string, base string, wd string, date_string string, err error) {
 	res, err := http.Get(fmt.Sprintf("https://lmg-anrath.de/aktuelle_plaene/Vertretungsplan/%s/subst_001.htm", day))
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", "", err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		return nil, "", "", err
+		return nil, "", "", "", err
 	}
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", "", err
 	}
 
 	// date handling
@@ -36,10 +36,9 @@ func Scrape(day string) (data [][]string, base string, wd string, err error) {
 	heading_fmt := strings.ReplaceAll(strings.Split(heading, " ")[0], ".", "-")
 	date, err := time.Parse("2-1-2006", heading_fmt)
 	if err != nil {
-		return nil, "", "", err
+		return nil, "", "", "", err
 	}
-	date_string := date.Format("02-01-2006")
-	_ = date_string
+	date_string = date.Format("02-01-2006")
 	curr_time := time.Now()
 	if day == "morgen" {
 		curr_time = curr_time.AddDate(0, 0, 1)
@@ -98,5 +97,5 @@ func Scrape(day string) (data [][]string, base string, wd string, err error) {
 
 	base64_string := utils.EncodeBase64(data_string)
 
-	return rows_formatted, base64_string, weekday, nil
+	return rows_formatted, base64_string, weekday, date_string, nil
 }

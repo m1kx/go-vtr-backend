@@ -42,7 +42,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 
 	for t := 0; t < len(days); t++ {
 		scrape_site_start := time.Now()
-		var data, base, weekday, err = plan.Scrape(days[t])
+		var data, base, weekday, date_string, err = plan.Scrape(days[t])
 		scrape_site_taken := time.Since(scrape_site_start).Milliseconds()
 		fmt.Printf("Site %sscrape%s for %s%s%s took %s%dms%s\n", config.Purple, config.Reset, config.Red, days[t], config.Reset, config.Purple, scrape_site_taken, config.Reset)
 
@@ -138,6 +138,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 
 			send_hash := ""
 			send_hash = all_base
+			err = pocketbase.EditField(fmt.Sprintf("%s_date", day), users[i].ID, date_string)
 			err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, send_hash)
 			//update_hash(send_hash, token, users[i].ID, day)
 
