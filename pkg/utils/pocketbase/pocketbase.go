@@ -27,7 +27,6 @@ func auth() (string, error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println("error")
 		return "", err
 	}
 	if res.StatusCode != 200 {

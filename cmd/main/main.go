@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/m1kx/go-vtr-backend/pkg/config"
 	"github.com/m1kx/go-vtr-backend/pkg/utils"
+	"github.com/m1kx/go-vtr-backend/pkg/utils/health"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/notify"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/plan"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/pocketbase"
@@ -152,6 +153,8 @@ func main() {
 
 	godotenv.Load(".env")
 
+	health.RunServer()
+
 	args := os.Args[1:]
 
 	last_base := [2]string{"", ""}
@@ -184,6 +187,7 @@ func main() {
 		last_base, last_num, err = run(last_base, last_num)
 		if err != nil {
 			fmt.Printf("Error occured:\n%s\n", err)
+			health.Dead(err.Error())
 			err = nil
 		}
 		time.Sleep(interval)
