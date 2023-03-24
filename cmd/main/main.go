@@ -192,6 +192,7 @@ func main() {
 			fmt.Printf("Error occured:\n%s\n", err)
 			health.Dead(err.Error())
 			err = nil
+			interval = time.Minute
 		}
 		time.Sleep(interval)
 		currentTime = time.Now().Local()
