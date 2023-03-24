@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -67,7 +68,6 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 		fmt.Println(fmt.Sprintf("Starting check for day %s...", days[t]))
 
 		for i := 0; i < len(users); i++ {
-			// get user data and check if theres a match
 			if !users[i].VERIFIED {
 				continue
 			}
@@ -106,7 +106,18 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				continue
 			}
 			all_string := ""
+			all_eva := 0
 			for i := 0; i < len(all); i++ {
+				split := strings.Split(all[i][1], " - ")
+				if strings.Contains(all[i][1], " - ") && len(split) == 2 && all[i][5] == "EVA" {
+					from, _err := strconv.Atoi(split[0])
+					to, _err := strconv.Atoi(split[1])
+					if _err == nil {
+						all_eva += -(from - to - 1)
+					}
+				} else if all[i][5] == "EVA" {
+					all_eva += 1
+				}
 				for x := 0; x < len(all[i]); x++ {
 					if x == len(all[i])-1 {
 						all_string = fmt.Sprintf("%s%s!!!", all_string, all[i][x])
@@ -121,6 +132,10 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 			if (day == "h" && all_base == users[i].H_HASH) || (day == "m" && all_base == users[i].M_HASH) {
 				fmt.Printf("   -> %sNo update%s\n", config.Red, config.Reset)
 				continue
+			}
+
+			if all_eva > 0 {
+				go pocketbase.EditField("score", users[i].ID, "users", users[i].SCORE+all_eva)
 			}
 
 			if users[i].NEW_VERSION {

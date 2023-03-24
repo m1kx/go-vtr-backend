@@ -37,6 +37,7 @@ type User struct {
 	UPDATED         string      `json:"updated"`
 	USERNAME        string      `json:"username"`
 	VERIFIED        bool        `json:"verified"`
+	SCORE           int         `json:"score"`
 	NEW_VERSION     bool        `json:"new_version"`
 	REQINFO         RequestInfo `json:"reqinfo"`
 }
