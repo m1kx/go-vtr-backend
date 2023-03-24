@@ -17,7 +17,7 @@ import (
 	"github.com/m1kx/go-vtr-backend/pkg/utils/structs"
 )
 
-func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, err error) {
+func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num_users int, err error) {
 	scrape_start := time.Now()
 	days := []string{"heute", "morgen"}
 	users, err := pocketbase.GetAllUsers()
@@ -43,25 +43,25 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 
 	for t := 0; t < len(days); t++ {
 		scrape_site_start := time.Now()
-		var data, base, weekday, date_string, err = plan.Scrape(days[t])
+		var data, updated_at, weekday, date_string, err = plan.Scrape(days[t])
 		if err != nil || date_string == "" {
 			fmt.Println(err)
 			continue
 		}
-		_ = pocketbase.EditField(fmt.Sprintf("day_%d", t+1), "ux8ausqmf2h57dd", "times", date_string)
+		go pocketbase.EditField(fmt.Sprintf("day_%d", t+1), "ux8ausqmf2h57dd", "times", date_string)
 
 		scrape_site_taken := time.Since(scrape_site_start).Milliseconds()
 		fmt.Printf("Site %sscrape%s for %s%s%s took %s%dms%s\n", config.Purple, config.Reset, config.Red, days[t], config.Reset, config.Purple, scrape_site_taken, config.Reset)
 
 		check_start := time.Now()
-		if base == last_base[t] && last_num == verified_count && !update_from_user {
+		if updated_at == last_updated_at[t] && last_num == verified_count && !update_from_user {
 			// website data didnt change since last time
 			fmt.Println("Not running... [no data change]")
-			new_base = last_base
+			new_updated_at = last_updated_at
 			continue
 		} else {
-			last_base[t] = base
-			new_base[t] = base
+			last_updated_at[t] = updated_at
+			new_updated_at[t] = updated_at
 		}
 
 		fmt.Println(fmt.Sprintf("Starting check for day %s...", days[t]))
@@ -94,7 +94,15 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 
 			if len(all) == 0 {
 				// clear hash
-				err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", "")
+				hash_of_day := ""
+				if day == "h" {
+					hash_of_day = users[i].H_HASH
+				} else {
+					hash_of_day = users[i].M_HASH
+				}
+				if hash_of_day != "" {
+					go pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", "")
+				}
 				continue
 			}
 			all_string := ""
@@ -141,7 +149,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 
 			send_hash := ""
 			send_hash = all_base
-			err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", send_hash)
+			go pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", send_hash)
 			//update_hash(send_hash, token, users[i].ID, day)
 
 		}
@@ -160,14 +168,14 @@ func main() {
 
 	args := os.Args[1:]
 
-	last_base := [2]string{"", ""}
+	last_updated_at := [2]string{"", ""}
 	last_num := 0
 	var err error
 
 	// only for testing
 	if len(args) > 0 && args[0] == "false" {
 		for i := 0; i < 1000; i++ {
-			last_base, last_num, err = run(last_base, last_num)
+			last_updated_at, last_num, err = run(last_updated_at, last_num)
 			if err != nil {
 				fmt.Printf("Error occured:\n%s", err)
 				err = nil
@@ -187,7 +195,7 @@ func main() {
 		} else {
 			interval = time.Minute * 20
 		}
-		last_base, last_num, err = run(last_base, last_num)
+		last_updated_at, last_num, err = run(last_updated_at, last_num)
 		if err != nil {
 			fmt.Printf("Error occured:\n%s\n", err)
 			health.Dead(err.Error())

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/m1kx/go-vtr-backend/pkg/utils"
 )
 
 func format_row(row []string) {
@@ -17,7 +16,7 @@ func format_row(row []string) {
 	}
 }
 
-func Scrape(day string) (data [][]string, base string, wd string, date_string string, err error) {
+func Scrape(day string) (data [][]string, updated_at string, wd string, date_string string, err error) {
 	res, err := http.Get(fmt.Sprintf("https://lmg-anrath.de/aktuelle_plaene/Vertretungsplan/%s/subst_001.htm", day))
 	if err != nil {
 		return nil, "", "", "", err
@@ -30,6 +29,8 @@ func Scrape(day string) (data [][]string, base string, wd string, date_string st
 	if err != nil {
 		return nil, "", "", "", err
 	}
+
+	updated_at = res.Header.Get("last-modified")
 
 	// date handling
 	heading := doc.Find(".mon_title").Text()
@@ -87,15 +88,5 @@ func Scrape(day string) (data [][]string, base string, wd string, date_string st
 		format_row(rows_formatted[i])
 	}
 
-	data_string := ""
-	for i := 0; i < len(rows_formatted); i++ {
-		for x := 0; x < len(rows_formatted[i]); x++ {
-			data_string = fmt.Sprintf("%s%s", data_string, rows_formatted[i][x])
-		}
-		data_string = fmt.Sprintf("%s%s", data_string, ":")
-	}
-
-	base64_string := utils.EncodeBase64(data_string)
-
-	return rows_formatted, base64_string, weekday, date_string, nil
+	return rows_formatted, updated_at, weekday, date_string, nil
 }
