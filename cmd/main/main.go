@@ -16,6 +16,7 @@ import (
 	"github.com/m1kx/go-vtr-backend/pkg/utils/plan"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/pocketbase"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/structs"
+	"github.com/robfig/cron/v3"
 )
 
 func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num_users int, err error) {
@@ -134,8 +135,8 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				continue
 			}
 
-			if all_eva > 0 {
-				go pocketbase.EditField("score", users[i].ID, "users", users[i].SCORE+all_eva)
+			if all_eva > 0 && day == "h" {
+				go pocketbase.EditField("h_score", users[i].ID, "users", all_eva)
 			}
 
 			if users[i].NEW_VERSION {
@@ -176,6 +177,11 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 }
 
 func main() {
+
+	// cronjob to add todays points to all points
+	c := cron.New()
+	c.AddFunc("0 0 * * *", pocketbase.ApplyPoints)
+	c.Start()
 
 	godotenv.Load(".env")
 
