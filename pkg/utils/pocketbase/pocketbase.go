@@ -30,6 +30,7 @@ func auth() (string, error) {
 		return "", err
 	}
 	if res.StatusCode != 200 {
+		fmt.Println(fmt.Sprintf(`{"identity": "%s", "password": "%s"}`, admin_mail, password))
 		return "", errors.New(fmt.Sprintf("Pocketbase Admin auth failed with code: %d", res.StatusCode))
 	}
 	defer res.Body.Close()

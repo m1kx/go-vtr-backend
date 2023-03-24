@@ -2,4 +2,5 @@
 pb/
 bot_*
 build.sh
+cmd/cli/
 .vscode
