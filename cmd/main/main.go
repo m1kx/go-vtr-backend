@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/m1kx/go-vtr-backend/pkg/api"
 	"github.com/m1kx/go-vtr-backend/pkg/config"
 	"github.com/m1kx/go-vtr-backend/pkg/utils"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/health"
@@ -35,7 +36,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 		if obj.UPDATE {
 			fmt.Printf("-> %sUser update%s from %s\n", config.Blue, config.Reset, obj.ID)
 			update_from_user = true
-			err = pocketbase.EditField("update", obj.ID, false)
+			err = pocketbase.EditField("update", obj.ID, "users", false)
 		}
 	}
 	num_users = verified_count
@@ -43,6 +44,9 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 	for t := 0; t < len(days); t++ {
 		scrape_site_start := time.Now()
 		var data, base, weekday, date_string, err = plan.Scrape(days[t])
+
+		err = pocketbase.EditField(fmt.Sprintf("day_%d", t+1), "ux8ausqmf2h57dd", "times", date_string)
+
 		scrape_site_taken := time.Since(scrape_site_start).Milliseconds()
 		fmt.Printf("Site %sscrape%s for %s%s%s took %s%dms%s\n", config.Purple, config.Reset, config.Red, days[t], config.Reset, config.Purple, scrape_site_taken, config.Reset)
 
@@ -92,7 +96,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 
 			if len(all) == 0 {
 				// clear hash
-				err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "")
+				err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", "")
 				continue
 			}
 			all_string := ""
@@ -139,8 +143,7 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 
 			send_hash := ""
 			send_hash = all_base
-			err = pocketbase.EditField(fmt.Sprintf("%s_date", day), users[i].ID, date_string)
-			err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, send_hash)
+			err = pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", send_hash)
 			//update_hash(send_hash, token, users[i].ID, day)
 
 		}
@@ -155,7 +158,7 @@ func main() {
 
 	godotenv.Load(".env")
 
-	health.RunServer()
+	api.RunServer()
 
 	args := os.Args[1:]
 

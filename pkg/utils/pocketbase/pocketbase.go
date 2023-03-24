@@ -86,12 +86,12 @@ func GetAllUsers() ([]structs.User, error) {
 }
 
 // update user in pocketbase
-func EditField(identifier string, id string, data interface{}) error {
+func EditField(identifier string, id string, collection string, data interface{}) error {
 	token, err := auth()
 	if err != nil {
 		return err
 	}
-	url := fmt.Sprintf("http://127.0.0.1:8090/api/collections/users/records/%s", id)
+	url := fmt.Sprintf("http://127.0.0.1:8090/api/collections/%s/records/%s", collection, id)
 	value_send := data
 	switch v := data.(type) {
 	case string:
