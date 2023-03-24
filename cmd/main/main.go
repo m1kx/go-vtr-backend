@@ -44,16 +44,14 @@ func run(last_base [2]string, last_num int) (new_base [2]string, num_users int, 
 	for t := 0; t < len(days); t++ {
 		scrape_site_start := time.Now()
 		var data, base, weekday, date_string, err = plan.Scrape(days[t])
-
-		err = pocketbase.EditField(fmt.Sprintf("day_%d", t+1), "ux8ausqmf2h57dd", "times", date_string)
-
-		scrape_site_taken := time.Since(scrape_site_start).Milliseconds()
-		fmt.Printf("Site %sscrape%s for %s%s%s took %s%dms%s\n", config.Purple, config.Reset, config.Red, days[t], config.Reset, config.Purple, scrape_site_taken, config.Reset)
-
-		if err != nil {
+		if err != nil || date_string == "" {
 			fmt.Println(err)
 			continue
 		}
+		_ = pocketbase.EditField(fmt.Sprintf("day_%d", t+1), "ux8ausqmf2h57dd", "times", date_string)
+
+		scrape_site_taken := time.Since(scrape_site_start).Milliseconds()
+		fmt.Printf("Site %sscrape%s for %s%s%s took %s%dms%s\n", config.Purple, config.Reset, config.Red, days[t], config.Reset, config.Purple, scrape_site_taken, config.Reset)
 
 		check_start := time.Now()
 		if base == last_base[t] && last_num == verified_count && !update_from_user {
