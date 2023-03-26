@@ -135,7 +135,7 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				continue
 			}
 
-			if all_eva > 0 && day == "h" {
+			if all_eva > 0 && day == "h" && time.Now().Format("02-01-2006") == date_string {
 				go pocketbase.EditField("h_score", users[i].ID, "users", all_eva)
 			}
 
