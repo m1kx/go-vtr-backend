@@ -1,5 +1,7 @@
 package structs
 
+import "github.com/pocketbase/pocketbase/tools/types"
+
 // struct for auth req response
 type AuthResponse struct {
 	Admin struct {
@@ -12,42 +14,15 @@ type AuthResponse struct {
 	TOKEN string `json:"token"`
 }
 
-// struct for user database
-type UserResponse struct {
-	PAGE       int    `json:"page"`
-	PERPAGE    int    `json:"perPage"`
-	TOTALITEMS int    `json:"totalItems"`
-	TOTALPAGES int    `json:"totalPages"`
-	ITEMS      []User `json:"items"`
-}
-
-// struct for auth user
 type User struct {
-	COLLECTIONID    string      `json:"collectionId"`
-	COLLECTIONNAME  string      `json:"collectionName"`
-	CREATED         string      `json:"created"`
-	EMAIL           string      `json:"email"`
-	EMAILVISIBILITY bool        `json:"emailVisibility"`
-	H_HASH          string      `json:"h_hash"`
-	M_HASH          string      `json:"m_hash"`
-	UPDATE          bool        `json:"update"`
-	SUBJECTS        string      `json:"subjects"`
-	CLASS           string      `json:"class"`
-	ID              string      `json:"id"`
-	UPDATED         string      `json:"updated"`
-	USERNAME        string      `json:"username"`
-	VERIFIED        bool        `json:"verified"`
-	SCORE           int         `json:"score"`
-	H_SCORE         int         `json:"h_score"`
-	NEW_VERSION     bool        `json:"new_version"`
-	REQINFO         RequestInfo `json:"reqinfo"`
+	Id, Username, Email, Subjects, Class, H_Hash, M_Hash string
+	NewUpdate, NewVersion, Verified                      bool
+	Score, H_Score                                       int
+	ReqInfo                                              types.JsonMap `db:"reqinfo"`
 }
 
-// struct for webhook info
-type RequestInfo struct {
-	URL     string
-	METHOD  string
-	INFOFMT string
+type HealthResponse struct {
+	Status, Last_Words string
 }
 
 // request props for sending messag per request

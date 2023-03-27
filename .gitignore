@@ -4,3 +4,4 @@ bot_*
 build.sh
 cmd/cli/
 .vscode
+pb_data/

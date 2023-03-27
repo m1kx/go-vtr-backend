@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/m1kx/go-vtr-backend/pkg/api"
 	"github.com/m1kx/go-vtr-backend/pkg/config"
 	"github.com/m1kx/go-vtr-backend/pkg/utils"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/health"
@@ -32,13 +31,13 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 	update_from_user := false
 	verified_count := 0
 	for _, obj := range users {
-		if obj.VERIFIED {
+		if obj.Verified {
 			verified_count++
 		}
-		if obj.UPDATE {
-			fmt.Printf("-> %sUser update%s from %s\n", config.Blue, config.Reset, obj.ID)
+		if obj.NewUpdate {
+			fmt.Printf("-> %sUser update%s from %s\n", config.Blue, config.Reset, obj.Id)
 			update_from_user = true
-			err = pocketbase.EditField("update", obj.ID, "users", false)
+			_ = pocketbase.EditField("new_update", obj.Id, "users", false)
 		}
 	}
 	num_users = verified_count
@@ -69,12 +68,12 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 		fmt.Println(fmt.Sprintf("Starting check for day %s...", days[t]))
 
 		for i := 0; i < len(users); i++ {
-			if !users[i].VERIFIED {
+			if !users[i].Verified {
 				continue
 			}
-			fmt.Println(fmt.Sprintf("Checking user %s", users[i].ID))
-			subjects := strings.Split(users[i].SUBJECTS, ":")
-			class := users[i].CLASS
+			fmt.Println(fmt.Sprintf("Checking user %s", users[i].Id))
+			subjects := strings.Split(users[i].Subjects, ":")
+			class := users[i].Class
 			all := [][]string{}
 			msg := fmt.Sprintf(">>> %s <<<", weekday)
 			for x := 0; x < len(subjects); x++ {
@@ -97,12 +96,12 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				// clear hash
 				hash_of_day := ""
 				if day == "h" {
-					hash_of_day = users[i].H_HASH
+					hash_of_day = users[i].H_Hash
 				} else {
-					hash_of_day = users[i].M_HASH
+					hash_of_day = users[i].M_Hash
 				}
 				if hash_of_day != "" {
-					go pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", "")
+					go pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].Id, "users", "")
 				}
 				continue
 			}
@@ -130,32 +129,32 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 			all_string = all_string[:len(all_string)-3]
 
 			all_base := utils.EncodeBase64(all_string)
-			if (day == "h" && all_base == users[i].H_HASH) || (day == "m" && all_base == users[i].M_HASH) {
+			if (day == "h" && all_base == users[i].H_Hash) || (day == "m" && all_base == users[i].M_Hash) {
 				fmt.Printf("   -> %sNo update%s\n", config.Red, config.Reset)
 				continue
 			}
 
 			if all_eva > 0 && day == "h" && time.Now().Format("02-01-2006") == date_string {
-				go pocketbase.EditField("h_score", users[i].ID, "users", all_eva)
+				go pocketbase.EditField("h_score", users[i].Id, "users", all_eva)
 			}
 
-			if users[i].NEW_VERSION {
-				notify.SendMail(msg, users[i].EMAIL)
+			if users[i].NewVersion {
+				notify.SendMail(msg, users[i].Email)
 			}
 
-			if users[i].REQINFO.URL != "" && users[i].NEW_VERSION {
+			if users[i].ReqInfo["url"] != "" && users[i].NewVersion {
 				props := ""
-				url := users[i].REQINFO.URL
-				if users[i].REQINFO.METHOD == "POST" {
-					props = strings.Replace(users[i].REQINFO.INFOFMT, "TITLE", weekday, 1)
+				url := users[i].ReqInfo["url"]
+				if users[i].ReqInfo["method"] == "POST" {
+					props = strings.Replace(fmt.Sprintf("%v", users[i].ReqInfo["infofmt"]), "TITLE", weekday, 1)
 					props = strings.Replace(props, "MESSAGE", strings.Replace(msg, "\n", "\\n", -1), 1)
-				} else if users[i].REQINFO.METHOD == "GET" {
-					url = strings.Replace(url, "MESSAGE", strings.Replace(strings.Replace(msg, "\n", "%0A", -1), " ", "+", -1), 1)
+				} else if users[i].ReqInfo["method"] == "GET" {
+					url = strings.Replace(fmt.Sprintf("%v", url), "MESSAGE", strings.Replace(strings.Replace(msg, "\n", "%0A", -1), " ", "+", -1), 1)
 				}
 				data := structs.HttpReq{
-					METHOD:   users[i].REQINFO.METHOD,
+					METHOD:   fmt.Sprintf("%v", users[i].ReqInfo["method"]),
 					PROPS:    props,
-					BASE_URL: url,
+					BASE_URL: fmt.Sprintf("%v", url),
 				}
 				err := notify.SendPerRequest(&data)
 				if err != nil {
@@ -165,8 +164,7 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 
 			send_hash := ""
 			send_hash = all_base
-			go pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].ID, "users", send_hash)
-			//update_hash(send_hash, token, users[i].ID, day)
+			go pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].Id, "users", send_hash)
 
 		}
 
@@ -178,14 +176,17 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 
 func main() {
 
+	go pocketbase.Start()
+
+	fmt.Println("Waiting for PocketBase to start...")
+	time.Sleep(time.Second * 10)
+
 	// cronjob to add todays points to all points
 	c := cron.New()
 	c.AddFunc("0 0 * * *", pocketbase.ApplyPoints)
 	c.Start()
 
 	godotenv.Load(".env")
-
-	api.RunServer()
 
 	args := os.Args[1:]
 
