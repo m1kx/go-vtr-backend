@@ -32,8 +32,8 @@ jobs:
         [Install]
         WantedBy=multi-user.target" > bot-${{ github.sha }}-go.service
         sudo systemctl reset-failed
-        sudo systemctl list-units --type=service --all | grep bot-.*-go | awk '{print $1}' | xargs -L1 sudo systemctl stop
-        sudo systemctl list-units --type=service --all | grep bot-.*-go | awk '{print $1}' | xargs -L1 sudo systemctl disable
+        sudo systemctl list-units --type=service --all | grep bot-.*-go || true | awk '{print $1}' || true | xargs -L1 sudo systemctl stop || true
+        sudo systemctl list-units --type=service --all | grep bot-.*-go || true | awk '{print $1}' || true | xargs -L1 sudo systemctl disable || true
         sudo rm -f /etc/systemd/system/bot-*-go.service || true
         sudo mv bot-*-go.service /etc/systemd/system/
         sudo systemctl daemon-reload
