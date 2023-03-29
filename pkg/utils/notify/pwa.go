@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/SherClockHolmes/webpush-go"
+	"github.com/m1kx/go-vtr-backend/pkg/config"
 )
 
 func Send(msg string, subscr string, mail string) {
@@ -24,5 +25,6 @@ func Send(msg string, subscr string, mail string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Printf("Sent PWA notification to %s%s%s \n", config.Yellow, mail, config.Reset)
 	defer resp.Body.Close()
 }
