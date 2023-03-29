@@ -186,7 +186,7 @@ func main() {
 	fmt.Println("Waiting for PocketBase to start...")
 	time.Sleep(time.Second * 2)
 
-	// cronjob to add todays points to all points
+	// cronjob to add todays points to all point
 	c := cron.New()
 	c.AddFunc("0 0 * * *", pocketbase.ApplyPoints)
 	c.Start()
