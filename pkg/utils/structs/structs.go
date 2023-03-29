@@ -15,10 +15,10 @@ type AuthResponse struct {
 }
 
 type User struct {
-	Id, Username, Email, Subjects, Class, H_Hash, M_Hash string
-	NewUpdate, NewVersion, Verified                      bool
-	Score, H_Score                                       int
-	ReqInfo                                              types.JsonMap `db:"reqinfo"`
+	Id, Username, Email, Subjects, Class, H_Hash, M_Hash, Notifications string
+	NewUpdate, NewVersion, Verified                                     bool
+	Score, H_Score                                                      int
+	ReqInfo                                                             types.JsonMap `db:"reqinfo"`
 }
 
 type HealthResponse struct {

@@ -139,7 +139,11 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 			}
 
 			if users[i].NewVersion {
-				notify.SendMail(msg, users[i].Email)
+				if users[i].Notifications != "" {
+					notify.Send(msg, users[i].Notifications, users[i].Email)
+				} else {
+					notify.SendMail(msg, users[i].Email)
+				}
 			}
 
 			if users[i].ReqInfo["url"] != "" && users[i].NewVersion {
@@ -158,6 +162,7 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				}
 				err := notify.SendPerRequest(&data)
 				if err != nil {
+					fmt.Println("couldnt send request")
 					fmt.Println(err)
 				}
 			}
@@ -179,7 +184,7 @@ func main() {
 	go pocketbase.Start()
 
 	fmt.Println("Waiting for PocketBase to start...")
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 2)
 
 	// cronjob to add todays points to all points
 	c := cron.New()
