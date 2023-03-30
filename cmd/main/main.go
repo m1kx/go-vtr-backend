@@ -103,6 +103,9 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				if hash_of_day != "" {
 					go pocketbase.EditField(fmt.Sprintf("%s_hash", day), users[i].Id, "users", "")
 				}
+				if users[i].h_score != 0 && day == "h" {
+					go pocketbase.EditField("h_score", users[i].Id, "users", 0)
+				}
 				continue
 			}
 			all_string := ""
