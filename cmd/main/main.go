@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -65,13 +67,13 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 			new_updated_at[t] = updated_at
 		}
 
-		fmt.Println(fmt.Sprintf("Starting check for day %s...", days[t]))
+		fmt.Printf("Starting check for day %s...\n", days[t])
 
 		for i := 0; i < len(users); i++ {
 			if !users[i].Verified {
 				continue
 			}
-			fmt.Println(fmt.Sprintf("Checking user %s", users[i].Id))
+			fmt.Printf("Checking user %s\n", users[i].Id)
 			subjects := strings.Split(users[i].Subjects, ":")
 			class := users[i].Class
 			all := [][]string{}
@@ -113,7 +115,7 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 			for i := 0; i < len(all); i++ {
 				split := strings.Split(all[i][1], " - ")
 				if strings.Contains(all[i][1], " - ") && len(split) == 2 && all[i][5] == "EVA" {
-					from, _err := strconv.Atoi(split[0])
+					from, _ := strconv.Atoi(split[0])
 					to, _err := strconv.Atoi(split[1])
 					if _err == nil {
 						all_eva += -(from - to - 1)
@@ -188,6 +190,16 @@ func main() {
 
 	fmt.Println("Waiting for PocketBase to start...")
 	time.Sleep(time.Second * 2)
+
+	// make shure the app exits
+	ca := make(chan os.Signal, 1)
+	signal.Notify(ca, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-ca
+		fmt.Println("Exiting")
+		os.Exit(1)
+	}()
 
 	// cronjob to add todays points to all point
 	c := cron.New()
