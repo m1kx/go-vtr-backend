@@ -3,6 +3,7 @@ package plan
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -73,6 +74,28 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 	doc.Find(".list").Each(func(i int, s *goquery.Selection) {
 		rows = append(rows, s)
 	})
+
+	if strings.Contains(heading, "Seite") {
+		sites := strings.Split(strings.Split(heading, "(Seite")[1], " / ")
+		min_site, err := strconv.Atoi(strings.TrimLeft(sites[0], " "))
+		max_site, err := strconv.Atoi(strings.Trim(sites[1], ")"))
+		if err == nil {
+			for i := min_site + 1; i <= max_site; i++ {
+				fmt.Printf("Scraping multiple sites... %d\n", i)
+				res, err := http.Get(fmt.Sprintf("https://lmg-anrath.de/aktuelle_plaene/Vertretungsplan/%s/subst_00%d.htm", day, i))
+				if err == nil {
+					doc, err := goquery.NewDocumentFromReader(res.Body)
+					if err == nil {
+						doc.Find(".list").Each(func(x int, s *goquery.Selection) {
+							if x > 7 {
+								rows = append(rows, s)
+							}
+						})
+					}
+				}
+			}
+		}
+	}
 
 	var rows_formatted [][]string
 	for i := 9; i < len(rows); i++ {
