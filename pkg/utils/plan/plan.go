@@ -109,6 +109,35 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 				}
 			}
 		}
+	} else {
+		client := &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrHandlerTimeout
+			},
+		}
+		for i := 2; i < 5; i++ {
+			res, err := client.Get(fmt.Sprintf("https://lmg-anrath.de/aktuelle_plaene/Vertretungsplan/%s/subst_00%d.htm", day, i))
+			if err != nil {
+				continue
+			}
+			updated_at_new := res.Header.Get("last-modified")
+			updated_date_new, err := time.Parse(layout, updated_at_new)
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				if updated_date.Before(updated_date_new) {
+					updated_at = updated_at_new
+				}
+			}
+			doc, err := goquery.NewDocumentFromReader(res.Body)
+			if err == nil {
+				doc.Find(".list").Each(func(x int, s *goquery.Selection) {
+					if x > 7 {
+						rows = append(rows, s)
+					}
+				})
+			}
+		}
 	}
 
 	var rows_formatted [][]string
