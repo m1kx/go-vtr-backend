@@ -31,7 +31,12 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 		return nil, "", "", "", err
 	}
 
+	layout := "Mon, 02 Jan 2006 15:04:05 MST"
 	updated_at = res.Header.Get("last-modified")
+	updated_date, err := time.Parse(layout, updated_at)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// date handling
 	heading := doc.Find(".mon_title").Text()
@@ -84,6 +89,15 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 				fmt.Printf("Scraping multiple sites... %d\n", i)
 				res, err := http.Get(fmt.Sprintf("https://lmg-anrath.de/aktuelle_plaene/Vertretungsplan/%s/subst_00%d.htm", day, i))
 				if err == nil {
+					updated_at_new := res.Header.Get("last-modified")
+					updated_date_new, err := time.Parse(layout, updated_at_new)
+					if err != nil {
+						fmt.Println(err)
+					} else {
+						if updated_date.Before(updated_date_new) {
+							updated_at = updated_at_new
+						}
+					}
 					doc, err := goquery.NewDocumentFromReader(res.Body)
 					if err == nil {
 						doc.Find(".list").Each(func(x int, s *goquery.Selection) {
