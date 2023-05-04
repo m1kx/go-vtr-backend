@@ -143,7 +143,7 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				go pocketbase.EditField("h_score", users[i].Id, "users", all_eva)
 			}
 
-			if users[i].NewVersion {
+			if users[i].NewVersion && pocketbase.SendNotification() {
 				if users[i].Notifications != "" {
 					notify.Send(msg, users[i].Notifications, users[i].Email)
 				} else {
@@ -151,7 +151,7 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				}
 			}
 
-			if users[i].ReqInfo["url"] != "" && users[i].NewVersion {
+			if users[i].ReqInfo["url"] != "" && users[i].NewVersion && pocketbase.SendNotification() {
 				props := ""
 				url := users[i].ReqInfo["url"]
 				if users[i].ReqInfo["method"] == "POST" {

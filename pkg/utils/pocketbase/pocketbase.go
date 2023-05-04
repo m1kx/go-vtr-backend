@@ -84,6 +84,12 @@ func GetAllUsers() ([]structs.User, error) {
 	return users, nil
 }
 
+func SendNotification() bool {
+	var send structs.SendNotification
+	app.Dao().ConcurrentDB().NewQuery("SELECT * FROM notifications").One(&send)
+	return send.Send
+}
+
 func ApplyPoints() {
 	start := time.Now()
 	users, err := GetAllUsers()

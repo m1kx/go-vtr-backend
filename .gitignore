@@ -5,3 +5,4 @@ build.sh
 cmd/cli/
 .vscode
 pb_data/
+fetch-db.sh

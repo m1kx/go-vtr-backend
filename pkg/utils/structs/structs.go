@@ -21,6 +21,11 @@ type User struct {
 	ReqInfo                                                             types.JsonMap `db:"reqinfo"`
 }
 
+type SendNotification struct {
+	Id   string
+	Send bool
+}
+
 type HealthResponse struct {
 	Status, Last_Words string
 }
