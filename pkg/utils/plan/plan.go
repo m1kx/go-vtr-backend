@@ -120,6 +120,7 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 			if err != nil {
 				continue
 			}
+			
 			updated_at_new := res.Header.Get("last-modified")
 			updated_date_new, err := time.Parse(layout, updated_at_new)
 			if err != nil {
@@ -131,6 +132,16 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 			}
 			doc, err := goquery.NewDocumentFromReader(res.Body)
 			if err == nil {
+				heading_new := doc.Find(".mon_title").Text()
+				heading_fmt_new := strings.ReplaceAll(strings.Split(heading_new, " ")[0], ".", "-")
+				date_new, err := time.Parse("2-1-2006", heading_fmt_new)
+				if err != nil {
+					fmt.Println(err)
+				}
+				date_string_new = date.Format("02-01-2006")
+				if date_string_new != date_string {
+					break
+				}
 				doc.Find(".list").Each(func(x int, s *goquery.Selection) {
 					if x > 7 {
 						rows = append(rows, s)
