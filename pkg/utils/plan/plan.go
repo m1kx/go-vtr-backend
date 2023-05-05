@@ -138,7 +138,7 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 				if err != nil {
 					fmt.Println(err)
 				}
-				date_string_new = date_new.Format("02-01-2006")
+				date_string_new := date_new.Format("02-01-2006")
 				if date_string_new != date_string {
 					break
 				}
