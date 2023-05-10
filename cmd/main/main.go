@@ -144,10 +144,9 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 			}
 
 			if users[i].NewVersion && pocketbase.SendNotification() {
+				notify.SendMail(msg, users[i].Email)
 				if users[i].Notifications != "" {
 					notify.Send(msg, users[i].Notifications, users[i].Email)
-				} else {
-					notify.SendMail(msg, users[i].Email)
 				}
 			}
 
