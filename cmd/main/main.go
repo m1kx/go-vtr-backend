@@ -194,6 +194,14 @@ func main() {
 		if e.Model.TableName() != "users" {
 			return nil
 		}
+
+		currentTime := time.Now()
+		fiveMinutesAgo := currentTime.Add(-5 * time.Minute)
+
+		if e.Model.GetUpdated().Time().After(fiveMinutesAgo) && e.Model.GetUpdated().Time().Before(currentTime) {
+			return nil
+		}
+
 		fmt.Println("Scraping site because of user update...")
 		last_updated_at, last_num, _ = Run([2]string{"", ""}, -1)
 		return nil
