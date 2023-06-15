@@ -191,14 +191,17 @@ func main() {
 
 	pocketbase.Config()
 	pocketbase.App.OnModelAfterUpdate().Add(func(e *core.ModelEvent) error {
+
 		if e.Model.TableName() != "users" {
 			return nil
 		}
 
-		currentTime := time.Now()
-		fiveMinutesAgo := currentTime.Add(-5 * time.Minute)
+		time.Sleep(time.Second * 10)
 
-		if e.Model.GetUpdated().Time().After(fiveMinutesAgo) && e.Model.GetUpdated().Time().Before(currentTime) {
+		currentTime := time.Now()
+		twoMinutesAgo := currentTime.Add(-2 * time.Minute)
+
+		if !e.Model.GetUpdated().Time().Before(twoMinutesAgo) {
 			return nil
 		}
 
