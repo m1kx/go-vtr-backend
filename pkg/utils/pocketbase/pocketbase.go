@@ -18,7 +18,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
-var app *pb.PocketBase
+var App *pb.PocketBase
 
 // authenticate as admin and return token
 func auth() (string, error) {
@@ -30,7 +30,7 @@ func auth() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "Application/json")
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
@@ -55,28 +55,30 @@ func auth() (string, error) {
 	return main.TOKEN, nil
 }
 
-func Start() {
-	app = pb.New()
+func Config() {
+	App = pb.New()
 
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+	App.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.AddRoute(
 			echo.Route{
 				Method:  http.MethodGet,
-				Path:    "/app/api/health",
+				Path:    "/App/api/health",
 				Handler: health.Health,
 			},
 		)
 		return nil
 	})
+}
 
-	if err := app.Start(); err != nil {
+func Start() {
+	if err := App.Start(); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func GetAllUsers() ([]structs.User, error) {
 	var users []structs.User
-	err := app.Dao().ConcurrentDB().NewQuery("SELECT * FROM users").All(&users)
+	err := App.Dao().ConcurrentDB().NewQuery("SELECT * FROM users").All(&users)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +88,7 @@ func GetAllUsers() ([]structs.User, error) {
 
 func SendNotification() bool {
 	var send structs.SendNotification
-	app.Dao().ConcurrentDB().NewQuery("SELECT * FROM notifications").One(&send)
+	App.Dao().ConcurrentDB().NewQuery("SELECT * FROM notifications").One(&send)
 	return send.Send
 }
 
@@ -94,7 +96,7 @@ func ApplyPoints() {
 	start := time.Now()
 	users, err := GetAllUsers()
 	if err != nil {
-		fmt.Println("Error occured while getting users to apply points, trying again in 10s:")
+		fmt.Println("Error occured while getting users to Apply points, trying again in 10s:")
 		fmt.Println(err)
 		time.Sleep(time.Second * 10)
 		ApplyPoints()
@@ -105,7 +107,7 @@ func ApplyPoints() {
 		}
 		err = user_points(users[i])
 		if err != nil {
-			fmt.Println("Error occured while apply points, trying again in 10s:")
+			fmt.Println("Error occured while Apply points, trying again in 10s:")
 			fmt.Println(err)
 			time.Sleep(time.Second * 10)
 			ApplyPoints()
@@ -115,22 +117,22 @@ func ApplyPoints() {
 }
 
 func user_points(user structs.User) error {
-	record, err := app.Dao().FindRecordById("users", user.Id)
+	record, err := App.Dao().FindRecordById("users", user.Id)
 	if err != nil {
 		return err
 	}
 	record.Set("h_score", 0)
 	record.Set("score", user.H_Score+user.Score)
-	err = app.Dao().SaveRecord(record)
+	err = App.Dao().SaveRecord(record)
 	return err
 }
 
 func EditField(identifier string, id string, collection string, data interface{}) error {
-	record, err := app.Dao().FindRecordById(collection, id)
+	record, err := App.Dao().FindRecordById(collection, id)
 	if err != nil {
 		return err
 	}
 	record.Set(identifier, data)
-	err = app.Dao().SaveRecord(record)
+	err = App.Dao().SaveRecord(record)
 	return err
 }

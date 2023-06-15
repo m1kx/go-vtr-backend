@@ -17,10 +17,11 @@ import (
 	"github.com/m1kx/go-vtr-backend/pkg/utils/plan"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/pocketbase"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/structs"
+	"github.com/pocketbase/pocketbase/core"
 	"github.com/robfig/cron/v3"
 )
 
-func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num_users int, err error) {
+func Run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num_users int, err error) {
 	scrape_start := time.Now()
 	days := []string{"heute", "morgen"}
 	users, err := pocketbase.GetAllUsers()
@@ -185,6 +186,18 @@ func run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 
 func main() {
 
+	last_updated_at := [2]string{"", ""}
+	last_num := 0
+
+	pocketbase.Config()
+	pocketbase.App.OnModelAfterUpdate().Add(func(e *core.ModelEvent) error {
+		if e.Model.TableName() != "users" {
+			return nil
+		}
+		fmt.Println("Scraping site because of user update...")
+		last_updated_at, last_num, _ = Run([2]string{"", ""}, -1)
+		return nil
+	})
 	go pocketbase.Start()
 
 	fmt.Println("Waiting for PocketBase to start...")
@@ -209,14 +222,12 @@ func main() {
 
 	args := os.Args[1:]
 
-	last_updated_at := [2]string{"", ""}
-	last_num := 0
 	var err error
 
 	// only for testing
 	if len(args) > 0 && args[0] == "false" {
 		for i := 0; i < 1000; i++ {
-			last_updated_at, last_num, err = run(last_updated_at, last_num)
+			last_updated_at, last_num, err = Run(last_updated_at, last_num)
 			if err != nil {
 				fmt.Printf("Error occured:\n%s", err)
 				err = nil
@@ -236,7 +247,7 @@ func main() {
 		} else {
 			interval = time.Minute * 20
 		}
-		last_updated_at, last_num, err = run(last_updated_at, last_num)
+		last_updated_at, last_num, err = Run(last_updated_at, last_num)
 		if err != nil {
 			fmt.Printf("Error occured:\n%s\n", err)
 			health.Dead(err.Error())
