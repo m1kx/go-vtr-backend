@@ -196,12 +196,12 @@ func main() {
 		if refresh_running {
 			return nil
 		}
-		refresh_running = true
 
 		if e.Model.TableName() != "users" {
 			return nil
 		}
 
+		refresh_running = true
 		fmt.Println("Scraping site because of user update...")
 		last_updated_at, last_num, _ = Run([2]string{"", ""}, -1)
 		refresh_running = false
