@@ -190,23 +190,21 @@ func main() {
 	last_num := 0
 
 	pocketbase.Config()
+	refresh_running := false
 	pocketbase.App.OnModelAfterUpdate().Add(func(e *core.ModelEvent) error {
+
+		if refresh_running {
+			return nil
+		}
+		refresh_running = true
 
 		if e.Model.TableName() != "users" {
 			return nil
 		}
 
-		time.Sleep(time.Second * 10)
-
-		currentTime := time.Now()
-		twoMinutesAgo := currentTime.Add(-2 * time.Minute)
-
-		if !e.Model.GetUpdated().Time().Before(twoMinutesAgo) {
-			return nil
-		}
-
 		fmt.Println("Scraping site because of user update...")
 		last_updated_at, last_num, _ = Run([2]string{"", ""}, -1)
+		refresh_running = false
 		return nil
 	})
 	go pocketbase.Start()
