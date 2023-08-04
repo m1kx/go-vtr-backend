@@ -210,7 +210,7 @@ func main() {
 	go pocketbase.Start()
 
 	fmt.Println("Waiting for PocketBase to start...")
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 4)
 
 	// make shure the app exits
 	ca := make(chan os.Signal, 1)
@@ -222,12 +222,19 @@ func main() {
 		os.Exit(1)
 	}()
 
+	godotenv.Load(".env")
+
+	users, _ := pocketbase.GetAllUsers()
+	for i := 0; i < len(users); i++ {
+		if users[i].Id == os.Getenv("ADMIN_ID") {
+			notify.Send("Server Started", users[i].Notifications, users[i].Email)
+		}
+	}
+
 	// cronjob to add todays points to all point
 	c := cron.New()
 	c.AddFunc("0 0 * * *", pocketbase.ApplyPoints)
 	c.Start()
-
-	godotenv.Load(".env")
 
 	args := os.Args[1:]
 
