@@ -184,16 +184,26 @@ func Run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 	return
 }
 
+var refresh_running bool
+
+func GetCurrentRunning() *bool {
+	return &refresh_running
+}
+
 func main() {
 
 	last_updated_at := [2]string{"", ""}
 	last_num := 0
 
 	pocketbase.Config()
-	refresh_running := false
+	refresh_running = false
 	pocketbase.App.OnModelAfterUpdate().Add(func(e *core.ModelEvent) error {
 
-		if refresh_running {
+		if e.Model.GetId() == "ux8ausqmf2h57dd" {
+			return nil
+		}
+
+		if *GetCurrentRunning() {
 			return nil
 		}
 
@@ -263,7 +273,9 @@ func main() {
 		} else {
 			interval = time.Minute * 20
 		}
+		refresh_running = true
 		last_updated_at, last_num, err = Run(last_updated_at, last_num)
+		refresh_running = false
 		if err != nil {
 			fmt.Printf("Error occured:\n%s\n", err)
 			health.Dead(err.Error())
