@@ -81,7 +81,7 @@ func Run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 			msg := fmt.Sprintf(">>> %s <<<", weekday)
 			for x := 0; x < len(subjects); x++ {
 				for d := 0; d < len(data); d++ {
-					if data[d][0] == class && data[d][2] == subjects[x] {
+					if data[d][0] == class && data[d][3] == subjects[x] {
 						msg = fmt.Sprintf("%s\n%s", msg, notify.AssembleMessage(data, d))
 						all = append(all, data[d])
 					}

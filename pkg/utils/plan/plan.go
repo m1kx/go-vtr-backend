@@ -120,7 +120,7 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 			if err != nil {
 				continue
 			}
-			
+
 			updated_at_new := res.Header.Get("last-modified")
 			updated_date_new, err := time.Parse(layout, updated_at_new)
 			if err != nil {
@@ -158,7 +158,9 @@ func Scrape(day string) (data [][]string, updated_at string, wd string, date_str
 			this_row = append(this_row, rows[i+x].Text())
 		}
 		i += 7
-		rows_formatted = append(rows_formatted, this_row)
+		if !([]rune(this_row[0])[0] == '\u00A0') {
+			rows_formatted = append(rows_formatted, this_row)
+		}
 	}
 
 	for i := 0; i < len(rows_formatted); i++ {
