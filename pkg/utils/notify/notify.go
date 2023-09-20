@@ -20,7 +20,7 @@ func AssembleMessage(data [][]string, d int) (msg_part string) {
 	} else {
 		info_time = fmt.Sprintf(" in Stunde %s ", info_time)
 	}
-	info_subject := strings.Split(data[d][2], " ")[0]
+	info_subject := strings.Split(data[d][3], " ")[0]
 	msg_part = fmt.Sprintf("🤖 %s in %s%s%s", info_type, info_subject, info_room, info_time)
 	return
 }

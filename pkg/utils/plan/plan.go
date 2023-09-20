@@ -11,9 +11,9 @@ import (
 )
 
 func format_row(row []string) {
-	split := strings.Split(row[2], " ")
+	split := strings.Split(row[3], " ")
 	if len(split) > 2 {
-		row[2] = fmt.Sprintf("%s %s", split[0], split[2])
+		row[3] = fmt.Sprintf("%s %s", split[0], split[2])
 	}
 }
 
