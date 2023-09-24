@@ -16,7 +16,7 @@ func SendMail(msg string, mail string) error {
 
 	mg := mailgun.NewMailgun(url, key)
 	m := mg.NewMessage(
-		"Plan Info <no-reply@mg.mikadev.tech>",
+		"Plan Info <plan@mg.mikaco.de>",
 		"Neuer Plan",
 		msg,
 		mail,
