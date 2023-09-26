@@ -121,7 +121,7 @@ func Run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 					if _err == nil {
 						all_eva += -(from - to - 1)
 					}
-				} else if all[i][5] == "EVA" {
+				} else if all[i][2] == "EVA" {
 					all_eva += 1
 				}
 				for x := 0; x < len(all[i]); x++ {
