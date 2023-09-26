@@ -6,7 +6,7 @@ import (
 )
 
 func AssembleMessage(data [][]string, d int) (msg_part string) {
-	info_type := data[d][5]
+	info_type := data[d][2]
 	info_room := ""
 	if strings.Contains(info_type, "Raum") {
 		info_room = fmt.Sprintf(" in Raum %s", data[d][4])
