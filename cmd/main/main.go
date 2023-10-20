@@ -151,7 +151,7 @@ func Run(last_updated_at [2]string, last_num int) (new_updated_at [2]string, num
 				}
 			}
 
-			if users[i].ReqInfo["url"] != "" && users[i].NewVersion && pocketbase.SendNotification() {
+			if users[i].ReqInfo["url"] != nil && users[i].NewVersion && pocketbase.SendNotification() {
 				props := ""
 				url := users[i].ReqInfo["url"]
 				if users[i].ReqInfo["method"] == "POST" {
