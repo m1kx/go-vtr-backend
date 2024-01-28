@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v5"
 	"github.com/m1kx/go-vtr-backend/pkg/config"
 	"github.com/m1kx/go-vtr-backend/pkg/utils"
 	"github.com/m1kx/go-vtr-backend/pkg/utils/health"
@@ -215,6 +217,26 @@ func main() {
 		fmt.Println("Scraping site because of user update...")
 		last_updated_at, last_num, _ = Run([2]string{"", ""}, -1)
 		refresh_running = false
+		return nil
+	})
+	pocketbase.App.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		e.Router.GET("/score", func(c echo.Context) error {
+			type User struct {
+				Id      string `json:"id"`
+				Score   int    `json:"score"`
+				H_Score int    `json:"-"`
+			}
+			users := []User{}
+			err := pocketbase.App.Dao().DB().NewQuery("SELECT id, score, h_score FROM users ORDER BY (score + h_score) DESC").All(&users)
+			for i := 0; i < len(users); i++ {
+				users[i].Score += users[i].H_Score
+			}
+			fmt.Println(users)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			}
+			return c.JSON(http.StatusOK, users)
+		})
 		return nil
 	})
 	go pocketbase.Start()
