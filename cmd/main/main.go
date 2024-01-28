@@ -222,13 +222,17 @@ func main() {
 	pocketbase.App.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.GET("/score", func(c echo.Context) error {
 			type User struct {
-				Id      string `json:"id"`
-				Score   int    `json:"score"`
-				H_Score int    `json:"-"`
+				Id         string `json:"id"`
+				Score      int    `json:"score"`
+				H_Score    int    `json:"-"`
+				Score_Name string `json:"-" db:"score_name"`
 			}
 			users := []User{}
-			err := pocketbase.App.Dao().DB().NewQuery("SELECT id, score, h_score FROM users ORDER BY (score + h_score) DESC").All(&users)
+			err := pocketbase.App.Dao().DB().NewQuery("SELECT id, score, h_score, score_name FROM users ORDER BY (score + h_score) DESC").All(&users)
 			for i := 0; i < len(users); i++ {
+				if users[i].Score_Name != "" {
+					users[i].Id = users[i].Score_Name
+				}
 				users[i].Score += users[i].H_Score
 			}
 			fmt.Println(users)
